@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/music_screen"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/darkPrimary">
+
+    <fragment
+        android:id="@+id/fragment2"
+        android:name="dms.org.musicplayer.MaterialPlayer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true" />
+
+    <fragment
+        android:id="@+id/fragment"
+        android:name="dms.org.musicplayer.compactPlayer"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+</FrameLayout>
