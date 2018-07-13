@@ -3,16 +3,21 @@ package dms.org.musicplayer;
 import android.Manifest;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.media.MediaMetadataRetriever;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -24,6 +29,8 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import java.util.zip.Inflater;
 
 public class MainWindow extends AppCompatActivity {
 
@@ -39,8 +46,11 @@ public class MainWindow extends AppCompatActivity {
 
     private android.support.v4.app.Fragment selectedFragment = Home.newInstance();
 
-    private ListView songList;
-
+    Inflater inflater;
+    private ListView songsList;
+    private SongListAdapter adapter;
+    private View rootview;
+    public ArrayList<Music> songs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,12 +62,18 @@ public class MainWindow extends AppCompatActivity {
         mainFrame = (FrameLayout) findViewById(R.id.main_frame_layout);
 
         homeFragment = new Home();
-        musicFragment = new musicList();
+        musicFragment = musicList.newInstance();
+
         compactPlayerC = (LinearLayout) findViewById(R.id.compactPlayerLayout);
 
         musicSlider = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
-        songList = (ListView) findViewById(R.id.song_list);
-        ArrayList<File> songs = loadSongs(Environment.getExternalStorageDirectory());
+        songs = setSongsAttributes(Environment.getExternalStorageDirectory());
+
+        try
+        {
+            songsList.setAdapter(adapter);
+        }
+        catch (Exception e) {System.out.println(e.getMessage());}
 
         musicSlider.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
@@ -112,25 +128,42 @@ public class MainWindow extends AppCompatActivity {
         });
 
     }
-    public ArrayList<File> loadSongs(File root){
-        ArrayList<File> al = new ArrayList<File>();
+    public ArrayList<Music> setSongsAttributes(File root)
+    {
+        String artist;
+        String title;
+        String album;
+        String genre;
+        MediaMetadataRetriever metadata = new MediaMetadataRetriever();
+        ArrayList<Music> songsWithAttrs = new ArrayList<Music>();
         File[] files = root.listFiles();
         for(File singleFile : files)
         {
             if(singleFile.isDirectory() && !singleFile.isHidden())
             {
-                al.addAll(loadSongs(singleFile));
+                songsWithAttrs.addAll(setSongsAttributes(singleFile));
             }
             else
             {
                 if(singleFile.getName().endsWith(".mp3"))
                 {
-                    al.add(singleFile);
+                    metadata.setDataSource(singleFile.getPath());
+                    if(metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) != null)
+                        title = metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+                    else
+                        title = singleFile.getName().substring(0, (singleFile.getName().length() - 2));
+                    artist = metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+                    album = metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+                    genre = metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
+                    songsWithAttrs.add(new Music(title, artist, album, genre));
                 }
             }
         }
-        return al;
+        return songsWithAttrs;
     }
+
+
+
     public void setCompactPlayerAlpha(@FloatRange(from = 0, to = 1) float pos)
     {
        float alpha = 1 - pos;
