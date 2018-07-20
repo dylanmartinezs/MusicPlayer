@@ -34,7 +34,7 @@
             android:textSize="18sp"
             android:textColor="@color/darkText"
             android:layout_weight="1"
-            android:text="TextView" />
+            android:text="Song Name" />
 
         <ImageView
             android:id="@+id/imageView"

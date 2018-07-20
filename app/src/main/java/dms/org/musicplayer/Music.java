@@ -1,21 +1,20 @@
 package dms.org.musicplayer;
 
-import java.io.File;
-
 public class Music
 {
     private String title;
     private String artist;
     private String album;
     private String genre;
-    private File song;
+    private String musicData;
 
-    public Music(String title, String artist, String album, String genre)
+    public Music(String title, String artist, String album, /*String genre,*/ String musicData)
     {
         this.title = title;
         this.artist = artist;
         this.album = album;
         this.genre = genre;
+        this.musicData = musicData;
     }
 
     public String getTitle() {
@@ -49,4 +48,8 @@ public class Music
     public void setGenre(String genre) {
         this.genre = genre;
     }
+
+    public String getMusicData() { return musicData; }
+
+    public void setMusicData(String musicData) { this.musicData = musicData; }
 }

@@ -5,10 +5,13 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.FloatRange;
+import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -17,28 +20,34 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.TranslateAnimation;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import java.util.zip.Inflater;
 
 public class MainWindow extends AppCompatActivity {
 
-    private FrameLayout mainFrame;
+    /*private FrameLayout mainFrame;*/
     private BottomNavigationView bottomNavigationView;
+    private FrameLayout musicSlideFrameMain;
 
     private Home homeFragment;
     private musicList musicFragment;
+    private FrameLayout fragmentToReplace;
 
     private SlidingUpPanelLayout musicSlider;
 
@@ -59,7 +68,7 @@ public class MainWindow extends AppCompatActivity {
         ActivityCompat.requestPermissions(MainWindow.this, new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
         bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
         BottomNavigationViewHelper.disableShiftMode(bottomNavigationView);
-        mainFrame = (FrameLayout) findViewById(R.id.main_frame_layout);
+        fragmentToReplace = (FrameLayout) findViewById(R.id.fragment_to_replace);
 
         homeFragment = new Home();
         musicFragment = musicList.newInstance();
@@ -67,32 +76,29 @@ public class MainWindow extends AppCompatActivity {
         compactPlayerC = (LinearLayout) findViewById(R.id.compactPlayerLayout);
 
         musicSlider = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
-        songs = setSongsAttributes(Environment.getExternalStorageDirectory());
+        songs = new ArrayList<>();
 
-        try
-        {
-            songsList.setAdapter(adapter);
-        }
-        catch (Exception e) {System.out.println(e.getMessage());}
+        setSongsAttributes();
 
         musicSlider.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
             public void onPanelSlide(View panel, @FloatRange(from = 0, to = 1) float slidePos) {
                 setCompactPlayerAlpha(slidePos);
+                moveBottomBar(slidePos);
             }
 
             @Override
             public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
-
             }
 
         });
 
         android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.mainFrame, selectedFragment);
+        transaction.replace(R.id.fragment_to_replace, selectedFragment);
         transaction.commit();
         bottomNavigationView.setSelectedItemId(R.id.nav_home);
 
+        musicSlider.setClipPanel(false);
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -120,7 +126,7 @@ public class MainWindow extends AppCompatActivity {
                         return false;
                 }
                 android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.mainFrame, selectedFragment);
+                transaction.replace(R.id.fragment_to_replace, selectedFragment);
                 transaction.commit();
                 return true;
             }
@@ -128,38 +134,36 @@ public class MainWindow extends AppCompatActivity {
         });
 
     }
-    public ArrayList<Music> setSongsAttributes(File root)
-    {
-        String artist;
-        String title;
-        String album;
-        String genre;
-        MediaMetadataRetriever metadata = new MediaMetadataRetriever();
-        ArrayList<Music> songsWithAttrs = new ArrayList<Music>();
-        File[] files = root.listFiles();
-        for(File singleFile : files)
-        {
-            if(singleFile.isDirectory() && !singleFile.isHidden())
-            {
-                songsWithAttrs.addAll(setSongsAttributes(singleFile));
-            }
-            else
-            {
-                if(singleFile.getName().endsWith(".mp3"))
-                {
-                    metadata.setDataSource(singleFile.getPath());
-                    if(metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) != null)
-                        title = metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+    public void setSongsAttributes() {
+        Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
+        Cursor cursor = getContentResolver().query(uri, null, selection, null, null);
+        String title, artist, album, genre, url;
+
+        if(cursor != null) {
+            if(cursor.moveToFirst()) {
+                do {
+                    if(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)) != null)
+                        title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
                     else
-                        title = singleFile.getName().substring(0, (singleFile.getName().length() - 2));
-                    artist = metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-                    album = metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-                    genre = metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE);
-                    songsWithAttrs.add(new Music(title, artist, album, genre));
+                        title = "Unknown";
+
+                    if(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)) != null)
+                        artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+                    else
+                        artist = "unknown";
+                    album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
+                    //genre = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Genres.NAME));
+                    url = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+
+                    Music current = new Music(title, artist, album, /*genre,*/ url);
+
+                    songs.add(current);
                 }
+                while(cursor.moveToNext());
             }
+            cursor.close();
         }
-        return songsWithAttrs;
     }
 
 
@@ -191,8 +195,8 @@ public class MainWindow extends AppCompatActivity {
             }
         }
     }
-    public String toString(int i)
+    public void moveBottomBar(@FloatRange(from = 0, to = 1) float pos)
     {
-        return i + "";
+        bottomNavigationView.setTranslationY(pos * 300);
     }
 }

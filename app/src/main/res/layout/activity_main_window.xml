@@ -6,41 +6,33 @@
     android:layout_height="match_parent"
     tools:context=".MainWindow">
 
-    <FrameLayout
-        android:id="@+id/mainFrame"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="0dp">
-
-
-    </FrameLayout>
     <com.sothree.slidinguppanel.SlidingUpPanelLayout xmlns:sothree="http://schemas.android.com/apk/res-auto"
         android:id="@+id/sliding_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="bottom"
         sothree:umanoPanelHeight="105dp"
-        sothree:umanoShadowHeight="4dp">
+        android:foregroundGravity="bottom"
+        sothree:umanoShadowHeight="4dp"
+        sothree:umanoDragView="@id/dragView"
+        sothree:umanoClipPanel="false"
+        sothree:umanoOverlay="false"
+        sothree:umanoScrollableView="@layout/music_screen">
 
         <include
-            layout="@layout/fragment_music_main"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginStart="0dp"
-            android:layout_marginTop="80dp"
-            android:layout_width="201dp"
-            android:layout_height="100dp" />
+            layout="@layout/fragment_layout_container"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"/>
 
         <include
             layout="@layout/music_screen"
+            android:id="@+id/dragView"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:layout_marginStart="0dp"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"/>
 
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
