@@ -1,5 +1,7 @@
 package dms.org.musicplayer;
 
+import android.net.Uri;
+
 public class Music
 {
     private String title;
@@ -7,14 +9,16 @@ public class Music
     private String album;
     private String genre;
     private String musicData;
+    private Uri albumArt;
 
-    public Music(String title, String artist, String album, /*String genre,*/ String musicData)
+    public Music(String title, String artist, String album, /*String genre,*/ String musicData, Uri albumArt)
     {
         this.title = title;
         this.artist = artist;
         this.album = album;
         this.genre = genre;
         this.musicData = musicData;
+        this.albumArt = albumArt;
     }
 
     public String getTitle() {
@@ -52,4 +56,8 @@ public class Music
     public String getMusicData() { return musicData; }
 
     public void setMusicData(String musicData) { this.musicData = musicData; }
+
+    public Uri getAlbumArt() { return albumArt; }
+
+    public void setAlbumArt(Uri albumArt) { this.albumArt = albumArt; }
 }

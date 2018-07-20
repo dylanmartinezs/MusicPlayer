@@ -3,6 +3,7 @@ package dms.org.musicplayer;
 import android.Manifest;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -60,6 +61,7 @@ public class MainWindow extends AppCompatActivity {
     private SongListAdapter adapter;
     private View rootview;
     public ArrayList<Music> songs;
+    public ArrayList<Albums> albums;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +79,7 @@ public class MainWindow extends AppCompatActivity {
 
         musicSlider = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
         songs = new ArrayList<>();
+        albums = new ArrayList<>();
 
         setSongsAttributes();
 
@@ -139,6 +142,8 @@ public class MainWindow extends AppCompatActivity {
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
         Cursor cursor = getContentResolver().query(uri, null, selection, null, null);
         String title, artist, album, genre, url;
+        int albumID;
+        Albums albumCursor;
 
         if(cursor != null) {
             if(cursor.moveToFirst()) {
@@ -156,8 +161,12 @@ public class MainWindow extends AppCompatActivity {
                     //genre = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Genres.NAME));
                     url = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
 
-                    Music current = new Music(title, artist, album, /*genre,*/ url);
+                    Long albumId = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
 
+                    Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
+                    Uri albumArtUri = ContentUris.withAppendedId(sArtworkUri, albumId);
+
+                    Music current = new Music(title, artist, album, /*genre,*/ url, albumArtUri);
                     songs.add(current);
                 }
                 while(cursor.moveToNext());

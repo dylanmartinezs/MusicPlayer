@@ -57,6 +57,7 @@ public class musicList extends Fragment {
         });
 
         itemDecorator.setDrawable(ContextCompat.getDrawable(getContext(), R.drawable.divider));
+        adapter.setHasStableIds(true);
         songsList.addItemDecoration(itemDecorator);
         songsList.setAdapter(adapter);
         songsList.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
