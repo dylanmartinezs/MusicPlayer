@@ -1,6 +1,7 @@
 package dms.org.musicplayer;
 
 import android.net.Uri;
+import android.support.annotation.NonNull;
 
 public class Music
 {
@@ -60,4 +61,6 @@ public class Music
     public Uri getAlbumArt() { return albumArt; }
 
     public void setAlbumArt(Uri albumArt) { this.albumArt = albumArt; }
+
+
 }

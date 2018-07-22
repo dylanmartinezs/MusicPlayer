@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".compactPlayer">
 
     <!-- TODO: Update blank fragment layout -->
@@ -26,7 +27,7 @@
             android:tint="@color/darkText"/>
 
         <TextView
-            android:id="@+id/textView"
+            android:id="@+id/compactPlayerSongTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -37,7 +38,7 @@
             android:text="Song Name" />
 
         <ImageView
-            android:id="@+id/imageView"
+            android:id="@+id/playStopBtn"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_gravity="center"
@@ -45,8 +46,18 @@
             android:layout_marginStart="16dp"
             android:scaleType="center"
             android:tint="@color/darkText"
-            android:src="@drawable/playbtn" />
+            android:src="@drawable/playbtn"
+            android:scaleX="1.35"
+            android:scaleY="1.35"/>
 
     </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/compactPlayerProgressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:progressDrawable="@drawable/compact_progress_bar"/>
+
 
 </FrameLayout>

@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -25,6 +26,7 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.ViewHo
 {
     private Context context;
     private ArrayList<Music> musicList;
+    OnItemClickListener onItemClickListener;
 
     public SongListAdapter(Context context, ArrayList<Music> musicList) {
         this.context = context;
@@ -39,12 +41,30 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.ViewHo
         return holder;
     }
 
+    public interface OnItemClickListener {
+        void onItemClick(LinearLayout b, View v, Music obj, int position);
+    }
+
+    public void set_OnItemClickListener(OnItemClickListener onItemClickListener){
+        this.onItemClickListener = onItemClickListener;
+    }
+
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.songTitle.setText(musicList.get(position).getTitle());
         holder.songArtist.setText(musicList.get(position).getArtist());
 
         Picasso.get().load(musicList.get(position).getAlbumArt()).error(R.drawable.coverbydefault).into(holder.albumArt);
+
+        holder.parentLayout.setOnClickListener(new View.OnClickListener()
+        {
+            final Music m = musicList.get(position);
+            public void onClick(View v) {
+                if(onItemClickListener != null)
+                    onItemClickListener.onItemClick(holder.parentLayout, v, m, position);
+            }
+        });
+
     }
 
     @Override

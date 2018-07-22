@@ -1,15 +1,23 @@
 package dms.org.musicplayer;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.PorterDuff;
 import android.media.MediaMetadataRetriever;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.annotation.FloatRange;
 import android.support.annotation.IntRange;
@@ -25,8 +33,11 @@ import android.view.animation.TranslateAnimation;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -63,6 +74,15 @@ public class MainWindow extends AppCompatActivity {
     public ArrayList<Music> songs;
     public ArrayList<Albums> albums;
 
+    boolean serviceBound = false;
+    private MediaPlayerService player;
+
+    public static ImageView playStopBtn;
+    public static TextView compactPlayerTitle;
+    public static ProgressBar compactPlayerProgressBar;
+    public static Handler handler = new Handler();
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,12 +96,18 @@ public class MainWindow extends AppCompatActivity {
         musicFragment = musicList.newInstance();
 
         compactPlayerC = (LinearLayout) findViewById(R.id.compactPlayerLayout);
+        playStopBtn = findViewById(R.id.playStopBtn);
+        compactPlayerTitle = findViewById(R.id.compactPlayerSongTitle);
+        compactPlayerProgressBar = findViewById(R.id.compactPlayerProgressBar);
+        Thread t = new MusicHelper.ProgressThread();
+        t.start();
 
         musicSlider = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
         songs = new ArrayList<>();
         albums = new ArrayList<>();
 
         setSongsAttributes();
+        MusicHelper.playBtnStuff();
 
         musicSlider.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
@@ -131,6 +157,7 @@ public class MainWindow extends AppCompatActivity {
                 android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.fragment_to_replace, selectedFragment);
                 transaction.commit();
+
                 return true;
             }
 
@@ -181,6 +208,7 @@ public class MainWindow extends AppCompatActivity {
     {
        float alpha = 1 - pos;
        compactPlayerC.setAlpha(alpha);
+       compactPlayerProgressBar.setAlpha(alpha);
        if(alpha == 0)
            compactPlayerC.setVisibility(View.GONE);
        else
@@ -207,5 +235,35 @@ public class MainWindow extends AppCompatActivity {
     public void moveBottomBar(@FloatRange(from = 0, to = 1) float pos)
     {
         bottomNavigationView.setTranslationY(pos * 300);
+    }
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            MediaPlayerService.LocalBinder binder = (MediaPlayerService.LocalBinder) service;
+            player = binder.getService();
+            serviceBound = true;
+
+            Toast.makeText(MainWindow.this, "Service Bound", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            serviceBound = false;
+        }
+    };
+
+    public void playAudio(String media) {
+        //Check is service is active
+        if (!serviceBound) {
+            Intent playerIntent = new Intent(this, MediaPlayerService.class);
+            playerIntent.putExtra("media", media);
+            startService(playerIntent);
+            bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+        } else {
+            //Service is active
+            //Send media with BroadcastReceiver
+        }
     }
 }
