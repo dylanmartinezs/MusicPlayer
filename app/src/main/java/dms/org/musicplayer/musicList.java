@@ -36,7 +36,7 @@ public class musicList extends Fragment {
     // private MediaPlayerService player;
     // private MediaPlayer player;
     boolean serviceBound = false;
-    public static SongListAdapter adapter;
+    public SongListAdapter adapter;
 
 
     public static musicList newInstance() {
@@ -74,7 +74,7 @@ public class musicList extends Fragment {
         songsList.setAdapter(adapter);
         songsList.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
 
-        MusicHelper.listListener();
+        MusicHelper.listListener(adapter, (MainWindow) getActivity());
 
 
 

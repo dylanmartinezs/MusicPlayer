@@ -54,7 +54,13 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.ViewHo
         holder.songTitle.setText(musicList.get(position).getTitle());
         holder.songArtist.setText(musicList.get(position).getArtist());
 
-        Picasso.get().load(musicList.get(position).getAlbumArt()).error(R.drawable.coverbydefault).into(holder.albumArt);
+        Picasso.get()
+                .load(musicList.get(position).getAlbumArt())
+                .transform(new RoundedCornersTransformation(10, 0, RoundedCornersTransformation.CornerType.ALL))
+                .placeholder(R.drawable.coverbydefault)
+                .error(R.drawable.coverbydefault)
+                .fit()
+                .into(holder.albumArt);
 
         holder.parentLayout.setOnClickListener(new View.OnClickListener()
         {

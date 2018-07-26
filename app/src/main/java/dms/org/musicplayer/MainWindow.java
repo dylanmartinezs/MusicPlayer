@@ -42,6 +42,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import java.util.Random;
 import java.util.zip.Inflater;
 
 public class MainWindow extends AppCompatActivity {
@@ -63,25 +65,38 @@ public class MainWindow extends AppCompatActivity {
 
     private SlidingUpPanelLayout musicSlider;
 
-    private LinearLayout compactPlayerC;
-
     private android.support.v4.app.Fragment selectedFragment = Home.newInstance();
 
     Inflater inflater;
-    private ListView songsList;
     private SongListAdapter adapter;
     private View rootview;
-    public ArrayList<Music> songs;
+    public static ArrayList<Music> songs;
     public ArrayList<Albums> albums;
 
+    //Media player service
     boolean serviceBound = false;
     private MediaPlayerService player;
+    public static Random suffle;
 
-    public static ImageView playStopBtn;
-    public static TextView compactPlayerTitle;
-    public static ProgressBar compactPlayerProgressBar;
+    //Compact Player
+    private LinearLayout compactPlayerC;
+    public ImageView playStopBtn;
+    public  TextView compactPlayerTitle;
+    public ProgressBar compactPlayerProgressBar;
     public static Handler handler = new Handler();
 
+    //Big Player Stuff
+    public ImageView bigPlayerPlayStopBtn;
+    public ImageView bigPlayerPrevBtn;
+    public ImageView bigPlayerNextBtn;
+    public ImageView bigPlayerRandom;
+    public ImageView bigPlayerRepeat;
+    public ImageView bigPlayerCover;
+    public TextView bigPlayerTitle;
+    public TextView bigPlayerArtist;
+    public SeekBar bigPlayerSeekBar;
+    public TextView currentTime;
+    public TextView maxTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,19 +110,22 @@ public class MainWindow extends AppCompatActivity {
         homeFragment = new Home();
         musicFragment = musicList.newInstance();
 
-        compactPlayerC = (LinearLayout) findViewById(R.id.compactPlayerLayout);
-        playStopBtn = findViewById(R.id.playStopBtn);
-        compactPlayerTitle = findViewById(R.id.compactPlayerSongTitle);
-        compactPlayerProgressBar = findViewById(R.id.compactPlayerProgressBar);
-        Thread t = new MusicHelper.ProgressThread();
-        t.start();
+        initCompactPlayer();
+        initBigPlayer();
+
+        /*Thread t = new MusicHelper.ProgressThread();
+        t.start();*/
 
         musicSlider = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
+        musicSlider.getChildAt(1).setOnClickListener(null);
         songs = new ArrayList<>();
         albums = new ArrayList<>();
+        suffle = new Random();
 
         setSongsAttributes();
-        MusicHelper.playBtnStuff();
+        MusicHelper.playBtnStuff(this);
+        MusicHelper.bigPlayerButtons(this);
+        MusicHelper.seekBarListener(this);
 
         musicSlider.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
@@ -169,8 +187,6 @@ public class MainWindow extends AppCompatActivity {
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
         Cursor cursor = getContentResolver().query(uri, null, selection, null, null);
         String title, artist, album, genre, url;
-        int albumID;
-        Albums albumCursor;
 
         if(cursor != null) {
             if(cursor.moveToFirst()) {
@@ -220,7 +236,7 @@ public class MainWindow extends AppCompatActivity {
         switch (requestCode) {
             case 1: {
 
-                if (grantResults.length > 0
+                if(grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                 } else {
@@ -228,7 +244,6 @@ public class MainWindow extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Permission denied to read your External storage", Toast.LENGTH_SHORT).show();
                     System.exit(0);
                 }
-                return;
             }
         }
     }
@@ -266,4 +281,79 @@ public class MainWindow extends AppCompatActivity {
             //Send media with BroadcastReceiver
         }
     }
+
+    public void initCompactPlayer() {
+        compactPlayerC = findViewById(R.id.compactPlayerLayout);
+        playStopBtn = findViewById(R.id.playStopBtn);
+        compactPlayerTitle = findViewById(R.id.compactPlayerSongTitle);
+        compactPlayerProgressBar = findViewById(R.id.compactPlayerProgressBar);
+    }
+
+    public void initBigPlayer() {
+        bigPlayerPlayStopBtn = findViewById(R.id.playerPlayBtn);
+        bigPlayerPrevBtn = findViewById(R.id.playerPrevious);
+        bigPlayerNextBtn = findViewById(R.id.playerNext);
+        bigPlayerRandom = findViewById(R.id.playerRandom);
+        bigPlayerRepeat = findViewById(R.id.playerRepeat);
+        bigPlayerCover = findViewById(R.id.bigPlayerCover);
+        bigPlayerTitle = findViewById(R.id.playerTitle);
+        bigPlayerArtist = findViewById(R.id.playerArtist);
+        bigPlayerSeekBar = findViewById(R.id.playerSeekBar);
+        currentTime = findViewById(R.id.currentTime);
+        maxTime = findViewById(R.id.maxTime);
+    }
+
+    public static Music previousSong() {
+        if(MusicHelper.songPos > 0)
+            MusicHelper.songPos--;
+
+        else
+            MusicHelper.songPos = songs.size() - 1;
+
+        return songs.get(MusicHelper.songPos);
+    }
+
+    public static Music nextSong() {
+        if(MusicHelper.suffleMode)
+            MusicHelper.songPos = suffle.nextInt(songs.size());
+
+        else {
+            switch(MusicHelper.repeatValue) {
+                case MusicHelper.REPEAT_ALL:
+                    if(MusicHelper.songPos < (songs.size() - 1))
+                        MusicHelper.songPos++;
+                    else
+                        MusicHelper.songPos = 0;
+                    break;
+
+                case MusicHelper.REPEAT_NONE:
+                    if(MusicHelper.songPos < (songs.size() - 1))
+                        MusicHelper.songPos++;
+                    else
+                        MusicHelper.songPos = 0;
+                    break;
+
+                case MusicHelper.REPEAT_ONE:
+                    break;
+            }
+        }
+
+        return songs.get(MusicHelper.songPos);
+    }
+
+    public void setPlayerStuff(Music m, int d) {
+        Picasso.get()
+                .load(m.getAlbumArt())
+                .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
+                .resize(0, bigPlayerCover.getHeight())
+                .into(bigPlayerCover);
+        bigPlayerArtist.setText(m.getArtist());
+        playStopBtn.setImageResource(R.drawable.pausebtn);
+        bigPlayerPlayStopBtn.setImageResource(R.drawable.pausebtn);
+        compactPlayerTitle.setText(m.getTitle());
+        bigPlayerTitle.setText(m.getTitle());
+        compactPlayerProgressBar.setMax(d);
+        bigPlayerSeekBar.setMax(d);
+    }
+    public static int getSongsNumber() { return songs.size() - 1; }
 }
