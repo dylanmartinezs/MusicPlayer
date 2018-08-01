@@ -5,22 +5,30 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".LayoutResources">
+    tools:context=".LayoutResources"
+    android:background="@color/darkBackPrimary">
 
     <!-- TODO: Update blank fragment layout -->
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="0dp"
+        android:paddingBottom="15dp"
+        android:background="@drawable/bottom_borders_round_shadow"
+        android:elevation="5dp">
 
-        <SeekBar
+        <org.adw.library.widgets.discreteseekbar.DiscreteSeekBar
             android:id="@+id/playerSeekBar"
             android:layout_width="353dp"
-            android:layout_height="15dp"
+            android:layout_height="21dp"
             android:layout_gravity="center"
             android:layout_marginEnd="15dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="2dp"
+            app:dsb_indicatorColor="@color/darkAccent"
+            app:dsb_progressColor="@color/darkAccent"
+            app:dsb_rippleColor="@color/darkAccent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -56,14 +64,15 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:textAlignment="center"
-        android:layout_marginTop="0dp">
+        android:layout_marginTop="0dp"
+        android:background="@color/darkBackPrimary">
 
         <TextView
             android:id="@+id/playerTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="20dp"
             android:gravity="center"
             android:text="TextView"
             android:textAlignment="center"
@@ -78,7 +87,7 @@
             android:id="@+id/playerArtist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="20dp"
             android:layout_marginTop="8dp"
             android:layout_gravity="center"
             android:text="TextView"
@@ -96,7 +105,9 @@
         android:layout_width="match_parent"
         android:layout_height="334dp"
         android:layout_weight="2"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:background="@drawable/top_borders_round_shadow"
+        android:elevation="10dp">
 
         <ImageView
             android:id="@+id/playerRandom"
@@ -107,10 +118,11 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
             android:src="@drawable/sufflebtn"
+            android:tint="@color/darkText"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:tint="@color/darkText"/>
+            app:layout_constraintVertical_bias="0.23000002" />
 
         <ImageView
             android:id="@+id/playerPrevious"
@@ -123,10 +135,11 @@
             android:layout_marginTop="20dp"
             android:layout_weight="1"
             android:src="@drawable/prevbtn"
+            android:tint="@color/darkText"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/playerRandom"
             app:layout_constraintTop_toTopOf="parent"
-            android:tint="@color/darkText"/>
+            app:layout_constraintVertical_bias="0.23000002" />
 
         <ImageView
             android:id="@+id/playerPlayBtn"
@@ -140,11 +153,12 @@
             android:layout_marginTop="20dp"
             android:cropToPadding="false"
             android:src="@drawable/playbtn"
+            android:tint="@color/darkText"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/playerNext"
             app:layout_constraintStart_toEndOf="@+id/playerPrevious"
             app:layout_constraintTop_toTopOf="parent"
-            android:tint="@color/darkText"/>
+            app:layout_constraintVertical_bias="0.23000002" />
 
         <ImageView
             android:id="@+id/playerNext"
@@ -156,10 +170,11 @@
             android:layout_marginEnd="56dp"
             android:layout_marginTop="20dp"
             android:src="@drawable/nextbtn"
+            android:tint="@color/darkText"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/playerRepeat"
             app:layout_constraintTop_toTopOf="parent"
-            android:tint="@color/darkText"/>
+            app:layout_constraintVertical_bias="0.23000002" />
 
         <ImageView
             android:id="@+id/playerRepeat"
@@ -170,10 +185,11 @@
             android:layout_marginEnd="16dp"
             android:layout_marginTop="20dp"
             android:src="@drawable/repeatbtn"
+            android:tint="@color/darkText"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:tint="@color/darkText"/>
+            app:layout_constraintVertical_bias="0.23000002" />
 
     </android.support.constraint.ConstraintLayout>
 

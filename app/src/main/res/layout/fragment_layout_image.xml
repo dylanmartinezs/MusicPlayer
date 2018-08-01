@@ -3,12 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     tools:context=".layoutImage">
 
     <ImageView
         android:id="@+id/bigPlayerCover"
-        android:layout_width="wrap_content"
-        android:layout_height="385dp"
+        android:layout_width="fill_parent"
+        android:scaleType="centerCrop"
+        android:layout_height="fill_parent"
+        android:layout_gravity="top"
+        android:layout_marginTop="0dp"
+        android:layout_margin="0dp"
         android:src="@drawable/coverbydefault" />
 </LinearLayout>

@@ -10,4 +10,5 @@
     <color name="darkPrimary">#232329</color>
     <color name="darkText">#EEEEEE</color>
     <color name="darkAccent">#0a87fc</color>
+    <color name="darkBackPrimary">#1a1a1e</color>
 </resources>
